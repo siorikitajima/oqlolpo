@@ -1,0 +1,22 @@
+<nav>
+    <div class="navLogo">
+        <a href="/">
+        <% if (nav == 'pfitem') { %>
+            <img src="../images/oqlOlpo_logo.svg" alt="oqlOlpo">
+        <% } else { %>
+            <img src="/images/oqlOlpo_logo.svg" alt="oqlOlpo">
+        <% } %>
+        </a>
+    </div>
+        <div class="navMenu">
+            <ul>
+                <a href="/portfolio">
+                <li <% if(nav == 'portfolio') {%>class="current"<%}%>>WORK</li>
+                </a>
+                <a href="/about">
+                <li <% if(nav == 'about') {%>class="current"<%}%>>ABOUT</li>
+                </a>
+            </ul>
+        </div>
+
+</nav>

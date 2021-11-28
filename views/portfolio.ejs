@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('./partials/head.ejs') %>
+
+<body>
+  <%- include('./partials/nav.ejs') %>
+
+    <div class="content grid">
+      <% for(let p = 0; p < pfs.length; p++) { %>
+        <a href="/portfolio/<%=pfs[p].slug%>">
+          <div class="portitem">
+              <img src="images/portfolio/<%=pfs[p].thumb%>" alt="thumbnail">
+            <div class="portText">
+              <h2><%=pfs[p].name%></h2>
+              <p><%=pfs[p].year%><br/> 
+                <% let length = pfs[p].types.length; %>
+                <% if (length == 1) { %>
+                  <%=pfs[p].types[0]%></p>
+                <% } else { %>
+                  <% for(let t = 0; t < length - 1; t++ ) { %>
+                    <%=pfs[p].types[t]%> / 
+                  <% } %>
+                  <%=pfs[p].types[length-1]%></p>
+                <% } %>
+            </div>
+          </div>
+        </a>
+      <% } %>
+    </div>
+
+    <%- include('./partials/footer.ejs') %>
+</body>
+</html>

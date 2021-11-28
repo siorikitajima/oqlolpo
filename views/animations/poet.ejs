@@ -1,0 +1,329 @@
+<script>
+let cols, rows, particle, particleNumber, bGcolor, shadowColor, elemColor, lightMode, nukeAcc;
+let noiseValue = 0.1;
+let gridSize = 20;
+let noiseLevel = 0.01;
+let speed = 0.2;
+let triSize = 150;
+let flowField = [];
+let particles = [];
+let letters = [];
+let modes = [];
+let rains = [];
+let ripples = [];
+let maxR = 200; let minR = 50;
+let maxG = 100; let minG = 20;
+let maxB = 100; let minB = 20;
+let innterWidth = 1000;
+let innerHeight = 750;
+
+function preload() {
+  myFont = loadFont('../fonts/PlayfairBold.otf');
+}
+
+function setup() {
+  textFont(myFont);
+  lightMode = true;
+  bGcolor = color(238, 240, 219);
+  shadowColor = color(41, 45, 59, 5);
+  elemColor = color(41, 45, 59);
+  var myCanvas = createCanvas(innterWidth, innerHeight);
+  myCanvas.parent("p5wrapper");
+  
+  cols = int( width / gridSize );
+  rows = int( height / gridSize );
+  particleNumber = (cols + rows) /2;
+
+  frameRate(24);
+  
+  for(let p = 0; p < particleNumber; p++) {
+    particle = new Particle();
+    particles.push(particle);
+  }
+}
+
+function draw() {
+  
+  background(bGcolor);
+  
+    translate(gridSize/2, gridSize/2);  
+  for (let v = 0; v < cols; v++) {
+    flowField[v] = [];
+    for (let r = 0; r < rows; r++) {
+      let offset = createVector((gridSize * v), (gridSize * r));
+      angleMode(DEGREES);
+      let head = p5.Vector.fromAngle(360 * noise(noiseValue * 0.01));
+      head.setMag(speed);
+      // head.add(offset);
+      // stroke(20);
+      // line(offset.x, offset.y, head.x, head.y);
+      flowField[v][r] = head;
+      noiseValue = noiseValue + noiseLevel;
+    }
+  }  
+  
+  for(let m = 0; m < modes.length; m++) {
+    modes[m].show();
+    modes[m].remove(modes);
+  }
+  
+  for(let r = 0; r < rains.length; r++) {
+    rains[r].show();
+    rains[r].remove(rains);
+  }
+  
+  for(let ri = 0; ri < ripples.length; ri++) {
+    ripples[ri].show();
+    ripples[ri].remove(ripples);
+  }
+  
+  for(let l = 0; l < letters.length; l++) {
+    letters[l].show();
+    letters[l].remove(letters);
+  }
+  
+  for(let p = 0; p < particles.length; p++) {
+  particles[p].show();
+  particles[p].move();
+  particles[p].follow(flowField);
+  particles[p].bounce();
+  particles[p].joint(particles);
+  }
+}
+
+function keyPressed() {
+  if (keyCode === 32 || keyCode === 37 || keyCode === 38 || keyCode === 39 || keyCode === 40) {
+    let mode = new Mode();
+    modes.push(mode);
+  } else if (keyCode === 16 || keyCode === 13 || keyCode === 20 || keyCode === 8 || keyCode === 9) {
+    let rain = new Rain();
+    rains.push(rain);    
+  } else if (keyCode === 17 || keyCode === 18 || keyCode === 91 || keyCode === 93 ) {
+    let nuke = createVector( random(width), random(height) );
+    let ripple = new Ripple(nuke);
+    ripples.push(ripple);
+  } else {
+    let letter = new Letter(key);
+    letters.push(letter);
+  }
+  return false;
+}
+
+class Ripple {
+  constructor(nuke) {
+    this.pos = nuke;
+    this.size = 10;
+    this.w = random(2, 6);
+  }
+  
+  show() {
+    noFill();
+    strokeWeight(this.w);
+    stroke( elemColor );
+    for (let r = 0; r < 4; r++) {
+      let offset = this.w * 4 * r;
+      circle(this.pos.x, this.pos.y, this.size + offset);
+    }
+    this.size = this.size * 2;
+    noStroke();
+  }
+  
+  remove(arrayName) {
+    if(this.size > width * 2) {
+      arrayName.splice(0,1);
+    }
+  }
+}
+
+class Rain {
+  constructor() {
+    this.speed = random( height/6 , height/10 );
+    this.w = random(2, 6);
+    this.h = 1;
+    this.num = floor(random(4, 20));
+    this.pos = createVector( random( (width - (this.w * this.num * 2)) ), 0);
+  }
+  
+  show() {
+    fill(elemColor);
+    for(let r = 0; r < this.num; r++) {
+      let offset = this.w * 2 * r;
+      rect((this.pos.x + offset), this.pos.y, this.w, this.h);
+    }
+    if (this.h > height) {
+        this.pos.y = this.pos.y + this.speed;
+      } else {
+        this.h = this.h + this.speed;      
+      }
+  }
+  
+  remove(arrayName) {
+    if(this.pos.y > height) {
+      arrayName.splice(0, 1);
+    }
+  }
+
+}
+
+class Particle {
+  constructor() {
+    this.pos = createVector(random(width), random(height));
+    this.vel = createVector(0, 0);
+    this.acc = createVector(0, 0);
+    this.maxspeed = 3.5;
+    this.random = random(-10, 40);
+  }
+  show() {
+    noFill();
+    noStroke();
+    circle( this.pos.x, this.pos.y, 2 );
+  }
+  move() {
+    this.vel.add(this.acc);
+    this.vel.limit(this.maxspeed);
+    this.pos.add(this.vel);
+    this.acc.mult(0);
+  }
+  follow(vectors) {
+    let force;
+    let x = int(this.pos.x / gridSize);
+    let y = int(this.pos.y / gridSize);
+    // let index = x + y * cols;
+    for( let v = 0; v < cols; v++) {
+      for( let r = 0; r < rows; r++) {
+        if(v == x) {
+          if(r == y) {
+            force = vectors[v][r];
+            break;
+          }}}
+    }
+    this.applyForce(force);
+  }
+  applyForce(force) {
+    this.acc.add(force);
+  }
+  bounce() {
+    if (this.pos.x < 0 || this.pos.x > width) {
+      this.vel.x = this.vel.x * -1;
+    }
+    if (this.pos.y < 0 || this.pos.y > height) {
+      this.vel.y = this.vel.y * -1;
+    }
+    if ( this.vel.x == 0 && this.vel.y == 0 ) {
+      let bounce = createVector(-0.1, -0.1);
+      this.acc.add(bounce);
+    }
+  }
+  joint(particles) {
+    particles.forEach(first =>{
+      let dis = dist( this.pos.x, this.pos.y,  first.pos.x, first.pos.y );
+      if( dis < triSize ) {
+        particles.forEach(second =>{
+          let dis2 = dist( this.pos.x, this.pos.y,  second.pos.x, second.pos.y );
+          if (dis2 < triSize ) {
+            // stroke(shadowColor);
+            fill(shadowColor);
+            if (dis2 < triSize /3 ) {
+                let r = floor(map(noise(first.pos.x *0.125), 0, 1, maxR, minR));
+                let g = floor(map(noise(first.pos.y *0.125), 0, 1, maxG, minG));
+                let b = floor(map(noise(second.pos.x *0.125), 0, 1, maxB, minB));
+                // stroke(r, g, b);
+                fill(r, g, b);
+            }
+            
+            let x1 = this.pos.x;
+            let y1 = this.pos.y;
+            let x2 = first.pos.x + (this.random * noise(first.pos.x *0.25));
+            let y2 = first.pos.y + (this.random * noise(first.pos.y *0.25));
+            let x3 = second.pos.x + (this.random * noise(second.pos.x *0.25));
+            let y3 = second.pos.y + (this.random * noise(second.pos.y *0.25));
+            
+            // curve(x1, y1, x2, y2, x3, y3, x1, y1);
+            triangle(x1, y1, x2, y2, x3, y3);
+          }
+        })
+      }
+    });
+    stroke(elemColor);
+    strokeWeight(this.random);
+    point(this.pos.x, this.pos.y);
+    noStroke();
+  }
+}
+
+class Letter {
+    constructor(key) {
+      this.key = key;
+      this.size = random(20, 200);
+      this.speed = random(5, 10);
+      this.pos = createVector (random(width - this.size), random(height/2));
+      this.r = floor(map(noise(this.size *0.5), 0, 1, maxR, minR));
+      this.g = floor(map(noise(this.speed *0.5), 0, 1, maxG, minG));
+      this.b = floor(map(noise(this.pos.x *0.5), 0, 1, maxB, minB));
+    };
+    
+    show() {
+      if(this.key == 'q' || this.key == 'w' || this.key == 'a') {
+        this.size = width/2;
+        this.speed = random(20, 40);
+      }
+      fill(this.r, this.g, this.b);
+      textSize(this.size)
+      text(this.key, this.pos.x, this.pos.y);
+      this.pos.y = this.pos.y + this.speed;
+    };
+    
+    remove(arrayName) {
+      let removeYpos = height + this.size;
+      if(this.pos.y > removeYpos) {
+        let index;
+        for (let l = 0; l < arrayName.length; l++) {
+          if ( this.pos.y == arrayName[l].y ) {
+            index = l;
+            break;
+          }
+        }
+        arrayName.splice( index, 1 );
+      }
+      if(arrayName.length > 30) {
+        arrayName.splice( 0, 1 );
+      }
+    };
+  }
+
+  class Mode {
+    constructor() {
+      this.r = 1;
+      this.speed = random(1.5, 2.5);
+    }
+    
+    show() {
+      if(lightMode) {
+        fill( 51, 55, 69 );
+      } else {
+        fill( 238, 245, 219 );
+      }
+      circle( width/2, height/2, this.r);
+      this.r = this.r * 2;
+    }
+    
+    remove(arrayName) {
+      if(this.r > width) {
+        arrayName.splice(0, 1);
+        if(lightMode) {
+          bGcolor = color(31, 35, 49);
+          shadowColor = color(238, 240, 219, 5);
+          elemColor = color(238, 240, 219);
+          maxR = maxR + 20; maxG = maxG + 20; maxB = maxB + 20;
+          lightMode = false;
+        } else {
+          bGcolor = color(238, 240, 219);
+          shadowColor = color(41, 45, 59, 5);
+          elemColor = color(41, 45, 59);
+          maxR = maxR - 20; maxG = maxG - 20; maxB = maxB - 20;
+          lightMode = true;
+        }
+      }
+    }
+  }
+</script>

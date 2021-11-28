@@ -1,0 +1,347 @@
+<script>
+let cols, rows, bgCol, elemCol, sideMargin, verMargin;
+let centers = [], rects = [], tiles = [], letters = [];
+let gridSize = 80;
+let maxR = 200; let minR = 60;
+let maxG = 140; let minG = 40;
+let maxB = 120; let minB = 30;
+let innterWidth = 1000;
+let innerHeight = 750;
+
+let action1 = false, action2 = false, action3 = false, action4 = false, action5 = false;
+let lMode = false;
+
+function preload() {
+  myFont = loadFont('../fonts/PressStart.otf');
+}
+
+function setup() {
+  var myCanvas = createCanvas(innterWidth, innerHeight);
+  myCanvas.parent("p5wrapper");
+  textFont(myFont);
+
+    bgCol = color(20,20,20);
+    elemCol = color(187, 184, 169);
+
+  cols = int( width / gridSize );
+  rows = int( height / gridSize );
+  sideMargin = (width - (cols * gridSize)) /2;
+  verMargin = (height - (rows * gridSize)) /2;
+  
+  translate(gridSize/2, gridSize/2);  
+  for (let v = 0; v < cols; v++) {
+    centers[v] = [];
+    rects[v] = [];
+    tiles[v] = [];
+    for (let r = 0; r < rows; r++) {
+      let mid = createVector( 0, 0);
+      let offset = createVector((gridSize * v), (gridSize * r));
+      mid.add(offset);
+      point(mid.x, mid.y);
+      centers[v][r] = mid;
+    }
+  }
+  
+  for (let v = 0; v < cols; v++) {
+    for (let r = 0; r < rows; r++) {
+    let recta = new Recta(centers[v][r].x, centers[v][r].y);
+    rects[v][r] = recta;
+    let tile = new Tile(centers[v][r].x, centers[v][r].y);
+    tiles[v][r] = tile;
+    tiles[v][r].hide(v, r, tiles);
+    }
+  }
+  
+  setInterval( changeHides, 4000);
+}
+
+function draw() {
+  background(bgCol);
+
+  noFill();
+  angleMode(DEGREES);
+
+  translate(sideMargin, verMargin); 
+  
+  for (let v = 0; v < cols; v++) {
+    for (let r = 0; r < rows; r++) {   
+      rects[v][r].show(v, r);
+      rects[v][r].action1();
+      rects[v][r].action2();
+      rects[v][r].action3();
+      rects[v][r].action4();
+      rects[v][r].action5();
+      tiles[v][r].show(v, r);
+    }
+  }
+  for (let l = 0; l < letters.length; l++) {   
+    letters[l].show();
+    letters[l].move();
+    letters[l].remove(letters);
+  }
+}
+
+function keyPressed() {
+  if (keyCode === 32 || keyCode === 9) {
+    action1 = !action1;
+  } else if (keyCode === 16 || keyCode === 13 || keyCode === 20 || keyCode === 8) {
+    action2 = !action2;
+  } else if (keyCode === 17 || keyCode === 18 || keyCode === 91 || keyCode === 93 ) {
+    action3 = !action3;
+  } else if (keyCode === 70 || keyCode === 85 || keyCode === 67 || keyCode === 75 ) {
+    action4 = !action4;
+  } else if (keyCode === 37 || keyCode === 38 || keyCode === 39 || keyCode === 40) { 
+    action5 = !action5;
+  } else if (keyCode === 49 || keyCode === 50 || keyCode === 51 || keyCode === 52 ) { 
+  if(!lMode) {
+    bgCol = color(187, 184, 169);
+    elemCol = color(20,20,20);
+  } else {
+    bgCol = color(20,20,20);
+    elemCol = color(187, 184, 169);
+  }
+    lMode = !lMode;
+    changeHides();
+  } else { 
+    let letter = new Letter(key);
+    letters.push(letter);
+  }
+}
+
+function changeHides() {
+    for (let v = 0; v < cols; v++) {
+      for (let r = 0; r < rows; r++) {   
+      tiles[v][r].hide(v, r, tiles);
+      }
+    }
+}
+
+class Tile {
+  constructor(x, y) {
+    this.size = gridSize;
+    this.pos = createVector( x + gridSize/2 , y + gridSize/2 );
+    this.color = bgCol;
+  }
+  show() {
+    rectMode(CENTER);
+    fill(this.color);
+    rect(this.pos.x, this.pos.y, this.size, this.size);
+  }
+  hide() {
+    let hide = random([0, 1]);
+    if (hide == 0) {
+      this.color = color(0, 0, 0, 0);
+    } else {
+      this.color = bgCol;
+    }
+  }
+}
+
+class Recta {
+  constructor(x, y) {
+    this.pos = createVector( x + gridSize/2 , y + gridSize/2 );
+    this.firstSize = gridSize;
+    this.secSize =  gridSize * 0.8;
+    this.thirSize =  gridSize * 0.6;
+    this.fourSize =  gridSize * 0.4;
+    this.fifSize =  gridSize * 0.2;
+    this.angle1 = 0;
+    this.offset1 = 0; // Adjust size for rotation
+    this.offset2 = 0;
+    this.center = createVector(0, 0); // center for rotating elem
+    this.shift = createVector(0, 0);
+    this.color = color(random(maxR, minR), random(maxG, minG), random(maxB, minB));
+    this.speed = 0.1;
+    this.zoomSp = 0.5;
+  }
+  
+  show(v, r) {
+    rectMode(CENTER);
+    noStroke();
+    let tx = (v * gridSize) + gridSize / 2;
+    let ty = (r * gridSize) + gridSize / 2;
+    
+    fill(this.color);
+    let rect0 = rect(this.pos.x, this.pos.y, this.firstSize, this.firstSize);
+
+    fill(bgCol);
+    push();
+    translate(tx, ty);
+    rotate(this.angle1);
+    let rect1 = rect(this.center.x + this.shift.x, this.center.y + this.shift.y, this.secSize - this.offset1, this.secSize - this.offset1); 
+    pop();
+    
+    fill(this.color);
+    let rect2 = rect(this.pos.x + (this.shift.x *2), this.pos.y + (this.shift.y *2), this.thirSize, this.thirSize);
+
+    fill(elemCol);
+    push();
+    translate(tx, ty);
+    rotate(this.angle1);
+    let rect3 = rect(this.center.x + (this.shift.x *3), this.center.y + (this.shift.y *3), this.fourSize, this.fourSize);
+    pop();
+    
+    fill(bgCol);
+    let rect4 = rect(this.pos.x + (this.shift.x *4) + this.offset2, this.pos.y + (this.shift.y *4) + this.offset2, this.fifSize, this.fifSize);
+  }
+  
+  action1() {
+    if(action1 == true) {
+          if(this.angle1 == 45) {
+            this.angle1 = 45;
+          } else {
+            this.angle1 = this.angle1 + 1;
+          }
+          if(this.offset1 == 14) {
+            this.offset1 = 14;
+          } else {
+            this.offset1 = this.offset1 + 0.5;
+          }
+    } else {
+          if(this.angle1 == 0) {
+            this.angle1 = 0;
+          } else {
+          this.angle1 = this.angle1 - 1;
+          }
+          if(this.offset1 == 0) {
+            this.offset1 = 0;
+          } else {
+            this.offset1 = this.offset1 - 0.5;
+          }
+    } 
+  }
+  action2() {
+      let moveR = createVector(this.speed, 0);
+      let moveL = createVector(-(this.speed), 0);
+    if (action2 == true) {
+      if (this.shift.x >= gridSize * 0.1) {
+        this.shift.x = gridSize * 0.1;
+      } else { 
+        this.shift.add(moveR);
+      }
+    } else {
+      if (this.shift.x <= -(gridSize * 0.1)) {
+        this.shift.x = -(gridSize * 0.1);
+      } else {
+        this.shift.add(moveL);
+      }
+    }
+  }
+  
+  action3() {
+      let moveT = createVector(0, -(this.speed));
+      let moveB = createVector(0, this.speed);
+    if(action3 == true) {
+      if(this.shift.y >= gridSize * 0.1) {
+        this.shift.y = gridSize * 0.1;
+      } else {
+        this.shift.add(moveB);
+      }
+    } else {
+      if(this.shift.y <= -(gridSize * 0.1)) {
+        this.shift.y = -(gridSize * 0.1);
+      } else {
+        this.shift.add(moveT);
+      }
+    }
+  }
+  
+  action4() {
+    if(action4 == true) {
+        if(this.fifSize > this.thirSize) {
+          this.fifSize = this.thirSize;
+        } else {
+          this.fifSize = this.fifSize + this.zoomSp;
+        }
+    } else {
+        if(this.fifSize <= gridSize * 0.2) {
+          this.fifSize = gridSize * 0.2;
+        } else {
+          this.fifSize = this.fifSize - this.zoomSp;
+        }
+    }
+  }
+  
+  action5() {
+    if(action5 == true) {
+        if(this.firstSize < this.thirSize) {
+          this.firstSize = this.thirSize;
+        } else {
+          this.firstSize = this.firstSize - this.zoomSp;
+        }
+    } else {
+        if(this.firstSize >= gridSize) {
+          this.firstSize = gridSize;
+        } else {
+          this.firstSize = this.firstSize + this.zoomSp;
+        }
+    }
+  }
+
+}
+
+class Letter {
+  constructor(key) {
+    this.key = key;
+    this.pos = createVector(gridSize * floor(random(cols)), gridSize * floor(random(rows)));
+    this.size = gridSize * ( floor(random(2, 6)) );
+    this.color = color(random(maxR, minR), random(maxG, minG), random(maxB, minB));
+    this.dir = random([0, 1]);
+    this.vel = createVector(0, 0)
+    this.speed = random(0.1, 0.5);
+    this.dotPos = -(this.size / 2) + (gridSize * 0.2);
+  }
+  
+  show() {
+    fill(this.color);
+    rect(this.pos.x, this.pos.y, this.size, this.size);
+    fill(bgCol);
+    textAlign(CENTER);
+    textSize(this.size * 0.6);
+    text(this.key, this.pos.x, this.pos.y + (this.size * 0.35));
+    rect(this.pos.x + this.dotPos, this.pos.y + this.dotPos, gridSize * 0.2, gridSize * 0.2);
+    rect(this.pos.x - this.dotPos, this.pos.y + this.dotPos, gridSize * 0.2, gridSize * 0.2);
+    rect(this.pos.x + this.dotPos, this.pos.y - this.dotPos, gridSize * 0.2, gridSize * 0.2);
+    rect(this.pos.x - this.dotPos, this.pos.y - this.dotPos, gridSize * 0.2, gridSize * 0.2);
+  }
+  
+  move() {
+    this.pos.add(this.vel);
+    if(this.dir == 0) {
+      if(this.pos.y > height /2) {
+        this.speed * -1;
+      } 
+      let moveVer = createVector(0, this.speed);
+      this.vel.add(moveVer);
+    } else if (this.dir == 1) {
+      if(this.pos.x > width /2) {
+        this.speed * -1;
+      }
+      let moveHor = createVector(this.speed, 0);
+      this.vel.add(moveHor);
+    }
+  }
+  
+  remove(arrayName) {
+    if(this.dir == 0) {
+      if(this.pos.y > height || this.pos.y < -(this.size) ) {
+        for (let l = 0; l < arrayName.length; l++) {
+          if (arrayName[l].pos.y == this.pos.y) {
+            arrayName.splice(l, 1);
+            break;
+          }
+        }
+      }
+    } else if (this.dir == 1) {
+      if(this.pos.x > width || this.pos.x < -(this.size) ) {
+        for (let l = 0; l < arrayName.length; l++) {
+          if (arrayName[l].pos.x == this.pos.x) {
+            arrayName.splice(l, 1);
+            break;
+          }
+        }
+      }      
+    }
+  }
+}
+</script>

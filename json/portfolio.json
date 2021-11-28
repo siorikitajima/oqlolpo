@@ -1,0 +1,116 @@
+[
+    {
+        "name": "Humble Pattern",
+        "slug": "humblepattern",
+        "thumb": "humble_thumb.jpg",
+        "year": 2021,
+        "types": [
+            "Generative",
+            "Interactive"
+        ],
+        "tools": ["<a href='https://p5js.org/' target='_blank'>p5.js</a>"],
+        "mainimg": {
+            "type": "embed",
+            "name": "humble",
+            "url": "https://preview.p5js.org/oqlolpo/embed/jBGKENWqN"
+        },
+        "page": {
+            "body": "Cute dancing cubes make patterns.",
+            "guide": "Press keys on your keyboard to play.",
+            "usedAt": "OnomatoPedal",
+            "usedAtLink": "https://onomatopedal.com/",
+            "links": {
+                "openprocessing": "https://openprocessing.org/sketch/1254383",
+                "nft": {
+                    "opensea": "",
+                    "hic": ""
+                }
+            }
+        }
+    },
+    {
+        "name": "Poet's Space",
+        "slug": "poetsspace",
+        "thumb": "poets_thumb.jpg",
+        "year": 2021,
+        "types": [
+            "Generative",
+            "Interactive"
+        ],
+        "tools": ["<a href='https://p5js.org/' target='_blank'>p5.js</a>"],
+        "mainimg": {
+            "type": "embed",
+            "name": "poet",
+            "url": "https://preview.p5js.org/oqlolpo/embed/dqpOcSPMc"
+        },
+        "page": {
+            "body": "A Poet's brain visualized.",
+            "guide": "Press keys on your keyboard to play.",
+            "usedAt": "OnomatoPedal",
+            "usedAtLink": "https://onomatopedal.com/",
+            "links": {
+                "openprocessing": "https://openprocessing.org/sketch/1254448",
+                "nft": {
+                    "opensea": "",
+                    "hic": ""
+                }
+            }
+        }
+    },
+    {
+        "name": "Erosion",
+        "slug": "erosion",
+        "thumb": "erosion_thumb.jpg",
+        "year": 2021,
+        "types": [
+            "Generative",
+            "Interactive"
+        ],
+        "tools": ["<a href='https://p5js.org/' target='_blank'>p5.js</a>"],
+        "mainimg": {
+            "type": "embed",
+            "name": "erosion",
+            "url": "https://preview.p5js.org/oqlolpo/embed/Pe_Ckoh2d"
+        },
+        "page": {
+            "body": "The feeling of creepy bugs crawling on you and you want to scratch so bad.",
+            "guide": "Press keys on your keyboard to play.",
+            "usedAt": "OnomatoPedal",
+            "usedAtLink": "https://onomatopedal.com/",
+            "links": {
+                "openprocessing": "https://openprocessing.org/sketch/1254456",
+                "nft": {
+                    "opensea": "",
+                    "hic": ""
+                }
+            }
+        }
+    },
+    {
+        "name": "Rolling Rocks",
+        "slug": "rollingrocks",
+        "thumb": "rolling_thumb.jpg",
+        "year": 2021,
+        "types": [
+            "Generative"
+        ],
+        "tools": ["<a href='https://p5js.org/' target='_blank'>p5.js</a>"],
+        "mainimg": {
+            "type": "embed",
+            "name": "rolling",
+            "url": "https://preview.p5js.org/oqlolpo/embed/zkqtjZEoi"
+        },
+        "page": {
+            "body": "We are like squishy rolling rocks.",
+            "usedAt": "OnomatoPedal",
+            "usedAtLink": "https://onomatopedal.com/",
+            "links": {
+                "openprocessing": "https://openprocessing.org/sketch/1254480",
+                "nft": {
+                    "opensea": "",
+                    "hic": ""
+                }
+            }
+        }
+    }
+]

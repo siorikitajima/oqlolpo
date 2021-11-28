@@ -1,0 +1,272 @@
+<script>
+let cols, rows, particle, particleNumber, flowField, elemColor;
+let noiseValue = 0;
+let gridSize = 20;
+let noiseLevel = 0.001;
+let speed = 1;
+let particles = [];
+let smudges = [];
+let bars = [];
+let maxR = 200; let minR = 100;
+let maxG = 80; let minG = 20;
+let maxB = 80; let minB = 20;
+let innterWidth = 1000;
+let innerHeight = 750;
+
+function preload() {
+  myFont = loadFont('../fonts/Anton.otf');
+}
+
+function setup() {
+  textFont(myFont);
+  elemColor = color(20, 20, 20);
+  var myCanvas = createCanvas(innterWidth, innerHeight);
+  myCanvas.parent("p5wrapper");
+  
+  flowField = new Array(cols);
+  for (var i = 0; i < flowField.length; i++) {
+    flowField[i] = new Array(rows);
+  }
+  
+  cols = int( width / gridSize );
+  rows = int( height / gridSize );
+  particleNumber = cols + rows
+
+  // frameRate(24);
+  
+  for(let p = 0; p < particleNumber; p++) {
+    particle = new Particle();
+    particles.push(particle);
+  }
+    background(random(minR, maxR), random(minG, maxG), random(minB, maxB));
+    setInterval( wipeScreen, 4000);
+
+}
+
+function draw() {
+  
+  translate(1, 1);  
+  for (let v = 0; v < cols; v++) {
+    for (let r = 0; r < rows; r++) {
+      translate(0, 0);
+      let mid = createVector( 0, 0);
+      let offset = createVector((gridSize * v), (gridSize * r));
+      var index = v + r * cols;
+      let perlin = noise(noiseValue);
+      angleMode(DEGREES);
+      let head = p5.Vector.fromAngle(360 * perlin);
+      head.setMag(speed);
+      flowField[index] = head;
+      noiseValue = noiseValue + noiseLevel;
+    }
+  }
+  
+  for(let s = 0; s < smudges.length; s++) {
+    smudges[s].show();
+    smudges[s].remove(smudges);
+  }
+      
+  for(let b = 0; b < bars.length; b++) {
+    bars[b].show();
+    bars[b].remove(bars);
+  }
+  
+  for(let p = 0; p < particles.length; p++) {
+  particles[p].show();
+  particles[p].move();
+  particles[p].follow(flowField);
+  particles[p].bounce();
+  }
+}
+
+function keyPressed() {
+  if (keyCode === 32 || keyCode === 16 || keyCode === 13 || keyCode === 20) {
+    let smudge = new Smudge(238, 238, 229);
+    smudges.push(smudge);
+  } else if (keyCode === 17 || keyCode === 18 || keyCode === 91 || keyCode === 93 ) {
+    let smudge = new Smudge(random(minR, maxR), random(minG, maxG), random(minB, maxB));
+    smudges.push(smudge);
+  } else if (keyCode === 69 || keyCode === 82 || keyCode === 79 || keyCode === 83 || keyCode === 73 || keyCode === 78 ) {
+    let letter = new Letter(key, random(minR, maxR), random(minG, maxG), random(minB, maxB));
+    letter.show();
+  } else if (keyCode === 70 || keyCode === 85 || keyCode === 67 || keyCode === 75 || keyCode === 89 ) {
+    let letter = new Letter(key, 238, 238, 229);
+    letter.show();
+  } else {
+    let paint = new Paint();
+    paint.show();
+  }
+  return false;
+}
+
+function wipeScreen() {
+  let bar = new Bar(random(minR, maxR), random(minG, maxG), random(minB, maxB));
+  bars.push(bar);
+}
+
+class Smudge {
+  constructor(r, g, b) {
+    this.pos = createVector(random(width), 0);
+    this.size = random(100, 200);
+    this.splash = random(4, 20);
+    this.vel = createVector(0, random(100, 300));
+    // this.acc = createVector(random(-0.1, 0.1), 0.1);
+    this.r = r;
+    this.g = g;
+    this.b = b;
+  }
+  
+  show() {
+    fill(this.r, this.g, this.b);
+    stroke(this.r, this.g, this.b);
+    strokeJoin(ROUND);
+    strokeWeight(10);
+    rect(this.pos.x, this.pos.y, this.size/4, (this.vel.y + 10));
+    rect(this.pos.x + this.size/4 + 20, this.pos.y, 30, (this.vel.y + 10));
+    rect(this.pos.x + this.size/4 + 70, this.pos.y, this.size/2, (this.vel.y + 10));
+    rect(this.pos.x + this.size/4 + this.size/2 + 110, this.pos.y, 20, (this.vel.y + 10));
+    rect(this.pos.x + this.size/4 + this.size/2 + 150, this.pos.y, this.size/4 - 20, (this.vel.y + 10));
+    noStroke();
+
+    let acc = createVector(random(-0.1, 0.1), 0.1);
+    this.pos.add(this.vel);
+    this.vel.add(acc);
+  
+      for ( let e = 0; e < 10; e++) {
+        let ranX = random(-100, this.size + 200);
+        let ranY = random(-100, 100) + noise(e * 0.00001);
+        let ran = random(2, 60);
+        circle(this.pos.x + ranX, this.pos.y + ranY, ran);
+      } 
+  }
+  
+  remove(arrayName) {
+    if(this.pos.x > width && this.size.x > width || this.pos.x < 0 && this.size.x < 0 || this.pos.y > height && this.size.y > height || this.pos.y < 0 && this.size.y < 0) {
+      arrayName.splice(0, 1);
+    }
+  }
+}
+
+class Particle {
+  constructor() {
+    this.pos = createVector(random(width), random(height));
+    this.vel = createVector(0, 0);
+    this.acc = createVector(0, 0);
+    this.maxspeed = 4;
+    this.random = random(-40, 40);
+    this.weight = random(6, 20);
+  }
+  show() {
+    stroke(elemColor);
+    let weight1 = this.weight * noise(this.pos.x);
+    let weight2 = this.weight * noise(this.pos.y);
+    let weight3 = random(1, 2);
+    let random1 = random(-60, 60);
+    let random2 = random(-60, 60);
+    strokeWeight(weight1);
+    point(this.pos.x, this.pos.y);
+    strokeWeight(weight2);
+    point(this.pos.x + this.random * noise(this.pos.x), this.pos.y + this.random * noise(this.pos.y));
+    strokeWeight(weight3);
+    line(this.pos.x, this.pos.y, this.pos.x + random1, this.pos.y + random2);
+    for(let s = 0; s < 3; s++) {
+      strokeWeight(weight2 * noise(this.pos.x));
+      point(this.pos.x + random2, this.pos.y + random1);
+    }
+    noStroke();
+  }
+  move() {
+    this.vel.add(this.acc);
+    this.vel.limit(this.maxspeed);
+    this.pos.add(this.vel);
+    this.acc.mult(0);
+  }
+  follow(vectors) {
+    let x = floor(this.pos.x / gridSize);
+    let y = floor(this.pos.y / gridSize);
+    let index = x + y * cols;
+    let force = vectors[index];
+    this.applyForce(force);
+  }
+  applyForce(force) {
+    this.acc.add(force);
+  }
+  bounce() {
+    if (this.pos.x < 0 || this.pos.x > width) {
+      this.vel.x = this.vel.x * -1;
+    }
+    if (this.pos.y < 0 || this.pos.y > height) {
+      this.vel.y = this.vel.y * -1;
+    }
+  }
+
+}
+
+class Paint {
+  constructor() {
+    this.size = random(100, width/4);
+    this.offset = random(10, 40);
+    this.num = floor(random(4, 20));
+    this.pos = createVector( random(width), random(height));
+    this.r = floor(map(noise(this.size), 0, 1, maxR, minR));
+    this.g = floor(map(noise(this.offset), 0, 1, maxG, minG));
+    this.b = floor(map(noise(this.num), 0, 1, maxB, minB));
+  }
+  
+  show() {
+    fill( this.r, this.g, this.b);
+    for (let c = 0; c < 3; c++ ) {
+      circle(this.pos.x * noise(this.pos.x) , this.pos.y * noise(this.pos.y), this.size * random(0.9, 1.2));
+      for ( let e = 0; e < 40; e++) {
+        let ran = random(2, 60);
+        let center = this.pos;
+        let edge = p5.Vector.random2D();
+        let length = map(noise(e*0.00000), 0, 1, this.size * noise(e*0.000001), (this.size * noise(e*0.000001) + this.offset));
+        edge.setMag(length);
+        center.add(edge);
+        circle(center.x, center.y, ran);
+      } 
+    }
+  }
+
+}
+
+class Letter {
+  constructor(key, r, g, b) {
+    this.key = key;
+    this.size = random(width/5, width/2);
+    this.pos = createVector (random(width), random(height));
+    this.r = r;
+    this.g = g;
+    this.b = b;
+  };
+  
+  show() {
+    fill(this.r, this.g, this.b);
+    textSize(this.size)
+    text(this.key, this.pos.x, this.pos.y);
+  };
+  
+}
+
+class Bar {
+  constructor(r, g, b) {
+    this.pos = createVector(0, 0);
+    this.speed = createVector(0, random(50, 200));
+    this.r = r;
+    this.g = g;
+    this.b = b;
+  }
+  show() {
+    noStroke();
+    fill(this.r, this.g, this.b);
+    rect(this.pos.x, this.pos.y, width, (this.speed.y + 10));
+    this.pos.add(this.speed);
+  }
+  remove(arrayName) {
+    if(this.pos.y > height) {
+      arrayName.splice(0, 1);
+    }
+  }
+}
+</script>

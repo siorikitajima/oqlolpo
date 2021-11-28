@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('./partials/head.ejs') %>
+
+<body class="clickable" onclick="nextPage()">
+    <div class="content opening middlecenter">
+        <div class="object">
+            <h1>oqlOlpo</h1>
+        </div>
+    </div>
+    <script>
+        function nextPage() {
+            window.location.href = '/portfolio';
+          }
+
+    </script>
+    <script>
+        let ohs = [];
+        let pins = [];
+        let wheels = [];
+        let stars = [];
+        let lines = [];
+        let stones = [];
+        let frontStones = [];
+
+        let densKey = 100;
+        let diameter;
+        let arms = [];
+        let smallScreen;
+        if (innerWidth < 700 || innerHeight < 700) { smallScreen = true; }
+        else { smallScreen = false; }
+
+        if (innerWidth < 700) { diameter = innerWidth * 0.9; }
+        else if (innerHeight < 700) { diameter = innerHeight * 0.9; }
+        else { diameter = 690; }
+
+        if (smallScreen) { arms[0] = 36; arms[1] = 10 }
+        else { arms[0] = 45; arms[1] = 8 }
+
+        let cactus, joshuaTree, torii;
+        function preload() {
+            cactus = loadImage('images/opening/cactus.png');
+            joshuaTree = loadImage('images/opening/joshuaTree.png');
+            torii = loadImage('images/opening/torii.png');
+        }
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            setInterval(drawOh(), 4000);
+            setInterval(drawStone(), 3000);
+            setInterval(frontStone(), 11000);
+            let theSize = width + height;
+            let density = floor(theSize / densKey);
+
+            for(let p = 0; p < arms[0]; p++) {
+                let pin = new Pin(arms[1] * p);
+                pins.push(pin);
+                let wheel = new Wheel(arms[1] * p + arms[1]/2);
+                wheels.push(wheel);
+            }
+
+            for(let s = 0; s < density; s++) {
+                let star = new Star();
+                stars.push(star);
+            }
+            for(let l = 0; l < density *2 ; l++) {
+                let line = new Line();
+                lines.push(line);
+            }
+        }
+
+        function draw() {
+            background(200);
+            for(let s = 0; s < stars.length; s++) {
+                stars[s].show();
+                stars[s].blink();
+            }
+            for(let l = 0; l < lines.length; l++) {
+                lines[l].show();
+                lines[l].move();
+            }
+            fill(17);
+            for(let t = 0; t < 10; t++) {
+                let ty = [ 0, 12, 23, 33, 42, 50, 57, 63, 68, 72 ];
+                let h = [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ];
+                rect(0, ty[t], width, h[t]*0.7);
+            }
+            for(let t = 0; t < 10; t++) {
+                let ty = [ 72, 68, 63, 57, 50, 42, 33, 23, 12, 0 ];
+                let h = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
+                rect(0, height-ty[t], width, h[t]*0.7);            
+            }
+
+            if(smallScreen && (height < 700)) {
+                null
+            } else if(smallScreen) {
+                image(cactus, 20, (height - 160 - 70), 50, 50*cactus.height/cactus.width);
+                image(torii, (width - 130), (height - 126 - 70), 40, 40*torii.height/torii.width);
+                image(joshuaTree, (width - 100), (height - 198 - 70), 90, 90*joshuaTree.height/joshuaTree.width);
+            } else {
+                image(cactus, 50, (height - 240 - 70), 75, 75*cactus.height/cactus.width);
+                image(torii, (width - 180), (height - 158 - 70), 50, 50*torii.height/torii.width);
+                image(joshuaTree, (width - 140), (height - 262 - 70), 120, 120*joshuaTree.height/joshuaTree.width);
+            }
+
+            for(let s = 0; s < stones.length; s++) {
+                stones[s].show();
+                stones[s].move();
+                stones[s].remove(stones);
+            }
+
+            fill(200);
+            noStroke();
+            circle(width/2, height/2, diameter);
+ 
+            for (let o = 0; o < ohs.length; o++) {
+                ohs[o].show();
+                ohs[o].explode();
+                ohs[o].shrink();
+                ohs[o].remove(ohs);
+            }
+
+            for (let p = 0; p < pins.length; p++) {
+                pins[p].show();
+                pins[p].rotating();
+            }
+
+            for (let w = 0; w < wheels.length; w++) {
+                wheels[w].show();
+                wheels[w].rotating();
+            }
+            for (let o = 0; o < ohs.length; o++) {
+                setTimeout(ohs[o].center(), 700);
+            }
+            fill(17);
+            noStroke();
+            circle(width/2, height/2, 30);
+
+            for(let f = 0; f < frontStones.length; f++) {
+                frontStones[f].show();
+                frontStones[f].move();
+                frontStones[f].remove(frontStones);
+            }
+        }
+        function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+        if (innerWidth < 700) { diameter = innerWidth * 0.9; }
+        else if (innerHeight < 700) { diameter = innerHeight * 0.9; }
+        else { diameter = 690; }
+        }
+
+        function drawOh() {
+            let oh = new Oh();
+            ohs.push(oh);
+            return drawOh;
+        }
+        function drawStone() {
+            let stone = new Stone(10, 80, false);
+            stones.push(stone);
+            return drawStone;
+        }
+        function frontStone() {
+            let stone = new Stone(60, 100, true);
+            frontStones.push(stone);
+            return frontStone;
+        }
+        class Oh {
+            constructor() {
+                this.pos = createVector(width/2, height/2);
+                this.size = 1;
+                this.r = random(50, 200);
+                this.g = random(50, 200);
+                this.b = random(50, 200);
+                this.easing = random(0.01, 0.03);
+                this.bigger = true;
+            }
+            show() {
+                fill(this.r, this.g, this.b, 200);
+                stroke(this.r, this.g, this.b);
+                circle(this.pos.x, this.pos.y, this.size);
+            }
+            explode() {
+                let dist = (diameter + 10) - this.size;
+                if (this.bigger) {
+                    if (this.size < diameter) {
+                        this.size = this.size + dist * this.easing;
+                    } else {
+                        this.bigger = false;
+                    }
+                }
+            }
+            shrink() {
+                let dist = (diameter + 10) - this.size;
+                if (!this.bigger) {
+                    if (this.size > 200) {
+                        this.size = this.size - dist * this.easing;
+                    } else {
+                        this.bigger = true;
+                    }
+                }
+            };
+
+            center() {
+                fill(this.r, this.g, this.b);
+                stroke(this.r, this.g, this.b);
+                circle(this.pos.x, this.pos.y, 200);
+            };
+
+            remove(arrayName) {
+                if (arrayName.length > 4 && arrayName[0].size <= 210) {
+                    // if (this.size <= 210) {
+                        arrayName.splice(0, 1);
+                        // console.log('Circe Layers: ' + arrayName.length);
+                    // }
+                }
+            };
+        }
+
+        class Pin {
+            constructor(angle) {
+                this.length = smallScreen ? (diameter - 10)/2 : (diameter - 30)/2;
+                this.pos = createVector(0, 0);
+                this.first = createVector(smallScreen ? 33 : 66, this.length * 0.4);
+                this.second = createVector(0, this.length * 0.85);
+                this.third = createVector(smallScreen ? 44: 99, this.length);
+                this.angle = angle;
+                this.speed = 0.2;
+                this.r = random(10, 80);
+                this.g = random(10, 80);
+                this.b = random(10, 80);
+                this.rSw = true;
+                this.gSw = true;
+                this.bSw = true;
+            }
+            show() {
+                push();
+                translate(width/2, height/2);
+                angleMode(DEGREES);
+                rotate(this.angle);
+                noFill();
+                stroke(this.r, this.g, this.b);
+                strokeWeight(1);
+                beginShape();
+                curveVertex(this.pos.x, this.pos.y);
+                curveVertex(this.pos.x, this.pos.y);
+                curveVertex(this.first.x, this.first.y);
+                curveVertex(this.second.x, this.second.y);
+                curveVertex(this.third.x, this.third.y);
+                curveVertex(this.third.x, this.third.y);
+                endShape();
+                fill(this.r, this.g, this.b);
+                circle(this.third.x , this.third.y , 4);
+                pop();
+            }
+            rotating() {
+                this.angle = this.angle + this.speed;
+                this.r = this.rSw ? this.r + this.speed : this.r - this.speed ;
+                this.g = this.gSw ? this.g + this.speed : this.g - this.speed ;
+                this.b = this.bSw ? this.b + this.speed : this.b - this.speed ;
+                if (this.r >= 200) {this.rSw = false;}
+                if (this.g >= 200) {this.gSw = false;}
+                if (this.b >= 200) {this.bSw = false;}
+                if (this.r <= 10) {this.rSw = true;}
+                if (this.g <= 10) {this.gSw = true;}
+                if (this.b <= 10) {this.bSw = true;}
+            }
+        }
+
+        class Wheel {
+            constructor(angle) {
+                this.length = smallScreen ? (diameter - 10)/2 : (diameter - 30)/2;
+                this.pos = createVector(0, 0);
+                this.first = createVector(smallScreen ? -33 : -66, this.length * 0.4);
+                this.second = createVector(0, this.length * 0.85);
+                this.third = createVector(smallScreen ? -44 : -99, this.length);
+                this.angle = angle;
+                this.speed = 0.2;
+                this.r = random(140, 190);
+                this.g = random(140, 190);
+                this.b = random(140, 190);
+                this.rSw = true;
+                this.gSw = true;
+                this.bSw = true;
+            }
+            show() {
+                push();
+                translate(width/2, height/2);
+                angleMode(DEGREES);
+                rotate(this.angle);
+                noFill();
+                stroke(this.r, this.g, this.b);
+                strokeWeight(1);
+                beginShape();
+                curveVertex(this.pos.x, this.pos.y);
+                curveVertex(this.pos.x, this.pos.y);
+                curveVertex(this.first.x, this.first.y);
+                curveVertex(this.second.x, this.second.y);
+                curveVertex(this.third.x, this.third.y);
+                curveVertex(this.third.x, this.third.y);
+                endShape();
+                fill(this.r, this.g, this.b);
+                circle(this.third.x , this.third.y , 4);
+                pop();
+            }
+            rotating() {
+                this.angle = this.angle - this.speed;
+                this.r = this.rSw ? this.r + this.speed : this.r - this.speed ;
+                this.g = this.gSw ? this.g + this.speed : this.g - this.speed ;
+                this.b = this.bSw ? this.b + this.speed : this.b - this.speed ;
+                if (this.r >= 200) {this.rSw = false;}
+                if (this.g >= 200) {this.gSw = false;}
+                if (this.b >= 200) {this.bSw = false;}
+                if (this.r <= 10) {this.rSw = true;}
+                if (this.g <= 10) {this.gSw = true;}
+                if (this.b <= 10) {this.bSw = true;}
+            }
+        }
+        class Star {
+            constructor(angle) {
+                this.size = random(4, 20);
+                this.pos = createVector(random(0, width), random(72 + this.size, height - 72 - this.size));
+                this.interval = random(300, 600);
+                this.timer = 1;
+            }
+            show() {
+                stroke(17);
+                strokeWeight(1);
+                translate(this.pos.x - width/2, this.pos.y - height/2);
+                    for(let l = 0; l < 6; l++) {
+                    push();
+                    translate(width/2, height/2);
+                    angleMode(DEGREES);
+                    rotate(l * 60);
+                    line(0, 0, this.size, 0);
+                    pop();
+                    }
+                translate(-(this.pos.x - width/2), -(this.pos.y - height/2));
+            }
+            blink() {
+                this.timer = this.timer +1;
+                if(this.timer >= this.interval) {
+                    this.size = 0;
+                    this.timer = 0;
+                }
+                if(this.timer < 30) {
+                    this.size = map(this.timer, 0, 30, 0, random(4, 10));
+                }
+            }
+        }
+
+        class Line {
+            constructor() {
+                this.pos = createVector(random(0, width), random(72, height - 72));
+                this.size = random(40, 100);
+                this.speed = random(0.4, 0.8);
+            }
+            show() {
+                stroke(17);
+                strokeWeight(1);
+                line(this.pos.x, this.pos.y, (this.pos.x + this.size), this.pos.y);
+            }
+            move() {
+                this.pos.x = this.pos.x + this.speed;
+                if(this.pos.x > width) this.pos.x = -this.size;
+            }
+        }
+
+        class Stone {
+            constructor(min, max, front) {
+                this.size = random(min, max);
+                this.front = front;
+                this.pos = createVector(-this.size, this.front ? random((height - 20 - (this.size /2)), height) : random((height - 70 - (this.size /2)), (height - 20 - (this.size /2))));
+                this.center = createVector(0, 0);
+                this.angle = floor(random(0, 360));      
+                this.speed = random(0.3, 0.8);
+                this.zero = createVector( -(this.size) * random(0.9, 1.2) , this.center.y * random(0.8, 1.3) );
+
+                this.first = createVector( -(this.size * 0.75) * random(0.9, 1.2), this.size * 0.5 * random(0.8, 1.2) );
+                this.second = createVector( -(this.size * 0.5) * random(0.9, 1.2), this.size * 0.85 * random(0.8, 1.2) );
+                this.third = createVector( this.size * 0.5 * random(0.9, 1.2), this.size * 0.85 * random(0.8, 1.2) );
+                this.forth = createVector( this.size * 0.75 * random(0.9, 1.2), this.size * 0.5 * random(0.8, 1.2) );
+                this.fifth = createVector( this.size * random(0.9, 1.2) , this.center.y * random(0.8, 1.2) );
+                this.sixth = createVector( this.size * 0.75 * random(0.9, 1.2), -(this.size * 0.5) * random(0.8, 1.2) );
+                this.seventh = createVector( this.size * 0.5 * random(0.9, 1.2), -(this.size * 0.85) * random(0.8, 1.2) );
+                this.eighth = createVector( -(this.size * 0.5) * random(0.9, 1.2), -(this.size * 0.85) * random(0.8, 1.2) );
+                this.nineth = createVector( -(this.size * 0.75) * random(0.9, 1.2), -(this.size * 0.5) * random(0.8, 1.2) );
+                // this.tenth = createVector( -(this.size * 0.75) * random(0.9, 1.2), this.size * 0.5 * random(0.8, 1.2) );
+            }
+            show() {
+                let xnoise = map(noise(this.pos.x / 10 ), 0, 1, 0.9, 1.1); 
+                let ynoise = map(noise(this.pos.y / 2), 0, 1, 0.9, 1.1); 
+                noStroke();
+                fill(17);
+                push();
+                translate(this.pos.x, (this.pos.y - this.size));
+                angleMode(DEGREES);
+                rotate(this.angle);
+                beginShape();
+                // curveVertex( this.zero.x * xnoise, this.zero.y * ynoise );
+                curveVertex( this.zero.x * xnoise, this.zero.y * ynoise );
+                curveVertex( this.first.x * xnoise, this.first.y * ynoise );
+                curveVertex( this.second.x * xnoise, this.second.y * ynoise );
+                curveVertex( this.third.x * xnoise, this.third.y * ynoise );
+                curveVertex( this.forth.x * xnoise, this.forth.y * ynoise );
+                curveVertex( this.fifth.x * xnoise, this.fifth.y * ynoise );
+                curveVertex( this.sixth.x * xnoise, this.sixth.y * ynoise );
+                curveVertex( this.seventh.x * xnoise, this.seventh.y * ynoise );
+                curveVertex( this.eighth.x * xnoise, this.eighth.y * ynoise );
+                curveVertex( this.nineth.x * xnoise, this.nineth.y * ynoise );
+                // curveVertex( this.tenth.x * xnoise, this.tenth.y * ynoise );
+                // curveVertex( this.tenth.x * xnoise, this.tenth.y * ynoise );
+                endShape(CLOSE);
+                noStroke();
+                fill(200);
+                let dotSize = [];
+                if(this.size < 20) { dotSize = [6, 4, 2]; }
+                else { dotSize = [10, 6, 4]; }
+                circle(-(this.nineth.x/2)  * xnoise, this.nineth.y, dotSize[1] * ynoise);
+                circle(this.eighth.x  * xnoise, this.eighth.y/3*2, dotSize[2] * ynoise);
+                if(this.size > 20) {
+                    circle(-(this.zero.x/2)  * xnoise, this.zero.y, dotSize[0] * ynoise);
+                }
+                if(this.size > 60) {
+                    circle((-(this.zero.x/2) + this.eighth.x) /2  * xnoise, this.nineth.y/2, dotSize[2] * ynoise);
+                }
+                if(this.size > 80) {
+                    circle((-(this.zero.x/2) + this.eighth.x) /3*2  * xnoise, this.eighth.y/3*2, dotSize[0] * ynoise);
+                }
+                pop();
+            }
+            move() {
+                this.angle = this.angle + this.speed * 2 * noise(this.angle);
+                this.pos.y = this.pos.y + (this.speed * 3 * random(-1, 1) * noise(this.angle));
+                this.pos.x = this.pos.x + (this.speed * 5 * noise(this.pos.x));
+                if ((this.pos.y - this.size/2) < (height - 70)) this.pos.y = this.pos.y + 1;
+                if ((this.pos.y - this.size/2) > height) this.pos.y = this.pos.y - 1;
+            }
+            remove(arrayName) {
+                if(arrayName[0].pos.x > width*1.5) {
+                    arrayName.splice(0, 1);
+                    // console.log('Rocks Total: ' + arrayName.length);
+                }
+            }
+        }
+
+    </script>
+</body>
+</html>

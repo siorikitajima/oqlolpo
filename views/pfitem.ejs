@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('./partials/head.ejs') %>
+
+<body>
+    <%- include('./partials/nav.ejs') %>
+
+    <div class="content pfitem">
+        <div class="mainimg">
+          
+            <% if (pfitem.mainimg.type == 'embed') { %>
+              <div class="animation" id="p5wrapper">
+                <% if (pfitem.mainimg.name == 'humble') { %>
+                  <%- include('./animations/humble.ejs') %>
+                <% } else if (pfitem.mainimg.name == 'poet') { %>
+                  <%- include('./animations/poet.ejs') %>
+                <% } else if (pfitem.mainimg.name == 'erosion') { %>
+                  <%- include('./animations/erosion.ejs') %>
+                <% } else if (pfitem.mainimg.name == 'rolling') { %>
+                  <%- include('./animations/rolling.ejs') %>
+                <% } %>
+              </div>
+            <% } else if (pfitem.mainimg.type == 'img') { %>
+                <img src="../images/portfolio/<%=pfitem.mainimg.url %>" alt="main image">
+            <% } %>
+        </div>
+        <div class="pfBody">
+            <h2><%=pfitem.name%></h2>
+            <p><%=pfitem.year%> / Created with 
+
+              <% let tlength = pfitem.tools.length; %>
+              <% if (tlength == 1) { %>
+                <%-pfitem.tools[0]%> / 
+              <% } else { %>
+              <% for(let t = 0; t < tlength - 1; t++ ) { %>
+                <%-pfitem.tools[t]%>, 
+                <% } %>
+                and <%-pfitem.tools[tlength-1]%></p>
+              <% } %>
+
+              <% let length = pfitem.types.length; %>
+              <% if (length == 1) { %>
+                <%=pfitem.types[0]%></p>
+              <% } else { %>
+                <% for(let t = 0; t < length - 1; t++ ) { %>
+                  <%=pfitem.types[t]%> / 
+                <% } %>
+                <%=pfitem.types[length-1]%></p>
+              <% } %>
+
+              <p><%=pfitem.page.body%>
+              <% if (pfitem.page.guide) { %><b> <%=pfitem.page.guide%></b> <% } %>
+              </p>
+
+              <p class="featured">
+
+            <!-- Uncomment once OPV2 is released -->
+              <!-- <% if (pfitem.page.usedAt) { %>
+                Featured in <a href="<%=pfitem.page.usedAtLink%>" target="_blank"><%=pfitem.page.usedAt%></a><br>
+              <% } %> -->
+              
+                Share and Like in <a href="<%=pfitem.page.links.openprocessing%>" target="_blank">OpenProcessing</a><br>
+
+            <!-- Uncomment once NFTs are ready -->
+                <!-- <% let nlength = pfitem.page.links.nft.length; %>
+                <% if (nlength == 1 && pfitem.page.links.nft.opensea) { %>
+                   NFT in <a href="<%=pfitem.page.links.nft.opensea%>" target="_blank">OpenSea</a></p>
+                <% } else if (nlength == 0) { %>
+                    NFT is not available atm.
+                <% } else if (nlength == 1 && pfitem.page.links.nft.hic) { %>
+                    NFT in <a href="<%=pfitem.page.links.nft.hic%>" target="_blank">HIC</a><
+                <% } else { %>
+                    NFT in <a href="<%=pfitem.page.links.nft.opensea%>" target="_blank">OpenSea</a> and <a href="<%=pfitem.page.links.nft.hic%>" target="_blank">HIC</a>
+                <% } %> -->
+            </p>
+        </div>
+    </div>
+
+        <% for (let p = 0; p < names.length; p++) {%>
+        <% if (names[p] == pfitem.slug) {%>
+            <% let prev, next; %>
+            <% if (p == 0) { prev = names[names.length-1] } else { prev = names[p-1] } %>
+            <% if (p == names.length-1) { next = names[0] } else { next = names[p+1] }%>
+        <div class="pfnav">
+            <a href="/portfolio/<%=prev%>"><div>PREV</div></a>
+            <a href="/portfolio"><div>ALL</div></a>
+            <a href="/portfolio/<%=next%>"><div>NEXT</div></a>
+        </div>
+        <% break; } %>
+        <% } %>
+
+    <%- include('./partials/footer.ejs') %>
+</body>
+</html>

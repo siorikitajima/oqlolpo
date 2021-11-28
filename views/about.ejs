@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('./partials/head.ejs') %>
+
+<body>
+  <%- include('./partials/nav.ejs') %>
+
+    <div class="content center">
+        <div class="aboutimg">
+            <img src="images/oqlOlpo_logo.svg" alt="oqlOlpo">
+        </div>
+        <div class="aboutText">
+            <h2>oqlOlpo</h2>
+            <p>Obsessed with the generative, interactive, experimental, complex, and scientific. Here to learn the unknown, collaborate with the unknown, and roll into the unknown.<br/>
+            Contact <a href="https://patternbased.com/contact" target="_blank">PatternBased</a> for more info.</p>
+
+            <h3>Support</h3>
+            <h4>Share and Like at <a href="https://openprocessing.org/user/285000/?view=sketches" target="_blank">OpenProcessing</a></h4>
+
+            <h4>NFT at <a href="https://opensea.io/oqlOlpo" target="_blank">OpenSea</a></h4>
+
+            <!-- <h4>Prints available on <a href="#" target="_blank">Redbubble</a></h4> -->
+
+            <h4>"Endovda Wurld" series merch available on <a href="https://www.amazon.com/s?rh=n%3A7141123011%2Cp_4%3AoqlOlpo" target="_blank">Amazon</a></h4>
+
+            <div class="channels">
+                <ul>
+                    <a href="https://openprocessing.org/user/285000/" target="_blank">
+                        <li>
+                        <img src="images/channels/openprocessing.svg" alt="openprocessing">
+                        </li>
+                    </a>
+                    <a href="https://opensea.io/oqlOlpo" target="_blank">
+                        <li>
+                        <img src="images/channels/opensea.svg" alt="opensea">
+                        </li>
+                    </a>
+                    <!-- <a href="#" target="_blank">
+                        <li>
+                        <img src="images/channels/redbubble.svg" alt="redbubble">
+                        </li>
+                    </a> -->
+                    <a href="https://www.instagram.com/ooqlolpoo/" target="_blank">
+                        <li>
+                        <img src="images/channels/instagram.svg" alt="instagram">
+                        </li>
+                    </a>
+                    <a href="https://twitter.com/OlpoOql" target="_blank">
+                        <li>
+                        <img src="images/channels/twitter.svg" alt="twitter">
+                        </li>
+                    </a>
+                    <a href="https://www.tiktok.com/@oqlolpo" target="_blank">
+                        <li>
+                        <img src="images/channels/tiktok.svg" alt="tiktok">
+                        </li>
+                    </a>
+                </ul>
+            </div>
+            <div class="channelTiles">
+                <% for (let t = 0; t < tiles.length; t++) { %>
+                    <div class="tile">
+                        <a href="<%=tiles[t].url%>" target="_blank">
+                            <img src="images/tiles/<%=tiles[t].image%>" alt="<%=tiles[t].name%>">
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <%- include('./partials/footer.ejs') %>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <% if (nav == 'pfitem') { %>
+    <link rel="stylesheet" href="../css/style.css">
+    <meta property="og:title" content="oqlOlpo - <%= title %>" />
+    <meta property="og:url" content="https://oqlolpo.com/portfolio/<%=pfitem.slug%>/" />
+    <meta property="og:image" content="https://oqlolpo.com/images/portfolio/<%= pfitem.thumb %>" />
+    <meta property="og:description" name="og:description" content="'<%= title %>' by oqlOlpo (<%= pfitem.year %>).<% for(let p = 0; p < pfitem.types.length; p++) { %> <%= pfitem.types[p] %> art.<%}%> <%= pfitem.page.body %>">
+    <meta property="description" name="description" content="'<%= title %>' by oqlOlpo (<%= pfitem.year %>).<% for(let p = 0; p < pfitem.types.length; p++) { %> <%= pfitem.types[p] %> art.<%}%> <%= pfitem.page.body %>">
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+    <link rel="manifest" href="../site.webmanifest">
+    <link rel="mask-icon" href="../safari-pinned-tab.svg" color="#bfab25">
+  <% } else { %>
+    <link rel="stylesheet" href="css/style.css">
+    <meta property="og:title" content="oqlOlpo - <%= title %>" />
+    <meta property="og:url" content="https://oqlolpo.com/<%=slug%>/" />
+    <meta property="og:image" content="https://oqlolpo.com/images/oqlOlpo_logo.jpg" />
+    <meta property="og:description" name="og:description" content="oqlOlpo is an artist who obsesses with generative, interactive, experimental, complexity, and science.">
+    <meta property="description" name="description" content="oqlOlpo is an artist who obsesses with generative, interactive, experimental, complexity, and science.">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#bfab25">
+  <% } %>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.js"></script>
+  <meta name="msapplication-TileColor" content="#bfab25">
+  <meta name="theme-color" content="#bfab25">
+  <meta property="og:type" content="website" />
+  <title>oqlOlpo | <%= title %></title>
+</head>
